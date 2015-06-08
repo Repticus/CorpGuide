@@ -1,0 +1,13 @@
+$fontColor: #4B3123;
+$backColor: #F7EFE4;
+
+body{
+	color: $fontColor;
+	background-color: $backColor;
+}
+
+.clr{
+	clear: both;
+}
+
+@import "nette";
