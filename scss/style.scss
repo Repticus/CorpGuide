@@ -1,11 +1,84 @@
 $fontColor: #4B3123;
 $backColor: #F7EFE4;
+$foreColor: #006da7;
 
 body{
 	color: $fontColor;
 	background-color: $backColor;
+	margin: 0;
 }
+form{
+	margin: 0;
+	padding: 0;
+}
+h1{
+	text-align: center;
+	font-size: 24px;
+}
+ul{
+	margin:0;
+	padding:0 15px;
+}
+a{
+	color: $foreColor;
+}
+#head{
+	color: $backColor;
+	background-color: $foreColor;
+	padding: 6px;
 
+	a{
+		color: $backColor;
+		text-decoration: none;
+	}
+	td{
+		white-space: nowrap;
+	}
+	svg{
+		width: 18px;
+		height: 18px;
+	}
+	form:first-of-type{
+		float: left;
+	}
+	form:last-of-type{
+		float: right;
+	}
+}
+.format{
+	display: block;
+	width: 600px;
+	margin: 20px auto;
+	text-align:center;
+}
+table.direction{
+	margin: 20px auto;
+	border-collapse: collapse;
+	background-color: #bebfc4;
+	tr:nth-child(even) {
+		background-color: #d9d9d9;
+	}
+	th{
+		padding: 4px;
+		margin: 2px;
+		color: #ffffff;
+		background-color: $foreColor;
+		border: 1px #21201d solid;
+	}
+	td {
+		padding: 4px;
+		margin: 2px;
+		text-align: center;
+		vertical-align: top;
+		border: 1px #21201d solid;
+	}
+	td:nth-child(3) {
+		text-align: left;
+	}
+	td:nth-child(4) {
+		text-align: right;
+	}
+}
 .clr{
 	clear: both;
 }

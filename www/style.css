@@ -1,6 +1,85 @@
 body {
   color: #4B3123;
   background-color: #F7EFE4;
+  margin: 0;
+}
+
+form {
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  text-align: center;
+  font-size: 24px;
+}
+
+ul {
+  margin: 0;
+  padding: 0 15px;
+}
+
+a {
+  color: #006da7;
+}
+
+#head {
+  color: #F7EFE4;
+  background-color: #006da7;
+  padding: 6px;
+}
+#head a {
+  color: #F7EFE4;
+  text-decoration: none;
+}
+#head td {
+  white-space: nowrap;
+}
+#head svg {
+  width: 18px;
+  height: 18px;
+}
+#head form:first-of-type {
+  float: left;
+}
+#head form:last-of-type {
+  float: right;
+}
+
+.format {
+  display: block;
+  width: 600px;
+  margin: 20px auto;
+  text-align: center;
+}
+
+table.direction {
+  margin: 20px auto;
+  border-collapse: collapse;
+  background-color: #bebfc4;
+}
+table.direction tr:nth-child(even) {
+  background-color: #d9d9d9;
+}
+table.direction th {
+  padding: 4px;
+  margin: 2px;
+  color: #ffffff;
+  background-color: #006da7;
+  border: 1px #21201d solid;
+}
+table.direction td {
+  padding: 4px;
+  margin: 2px;
+  text-align: center;
+  vertical-align: top;
+  border: 1px #21201d solid;
+}
+table.direction td:nth-child(3) {
+  text-align: left;
+}
+table.direction td:nth-child(4) {
+  text-align: right;
 }
 
 .clr {
@@ -13,10 +92,11 @@ a[href^="error:"] {
 }
 
 .flash {
-  padding: 8px;
-  margin-bottom: 2px;
+  width: 850px;
   border: 1px solid #ddd;
-  margin-bottom: 20px;
+  padding: 8px;
+  margin: 16px auto;
+  text-align: center;
 }
 
 .flash.success {

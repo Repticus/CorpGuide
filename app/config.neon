@@ -13,3 +13,7 @@ session:
 
 services:
 	router: App\RouterFactory::createRouter
+
+security:
+	users:
+		Admin: admin # Set admin password and other users in config.local.neon

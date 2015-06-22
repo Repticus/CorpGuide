@@ -3,10 +3,11 @@ a[href^="error:"] {
     color: white;
 }
 .flash {
-	padding: 8px;
-	margin-bottom: 2px;
+	width: 850px;
 	border: 1px solid #ddd;
-	margin-bottom: 20px;
+	padding: 8px;
+	margin: 16px auto;
+	text-align: center;
 }
 .flash.success {
 	background: #E6EFC2;
