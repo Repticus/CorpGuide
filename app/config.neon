@@ -1,4 +1,5 @@
 parameters:
+	docDir: "doc/" # Directory where are directive ducuments
 
 php:
 	date.timezone: Europe/Prague

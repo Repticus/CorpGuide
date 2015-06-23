@@ -6,32 +6,13 @@ use Nette\Utils\Finder;
 
 class CorporateDirective {
 
-	const WORKDIR = 'doc';
-
 	public $data = array();
 	public $errors = array();
 
-	function __construct() {
-		$charReplace = array("\x9a" => "\xb9", "\x9e" => "\xbe", "\x8a" => "\xa9", "\x8e" => "\xae");
-		foreach (Finder::findFiles("*")->in(self::WORKDIR) as $file) {
-			$rawFileName = $file->getFilename();
-			$fileName = iconv("ISO8859-2", "UTF-8", str_replace(array_keys($charReplace), array_values($charReplace), $rawFileName));
-			$fileLink = self::WORKDIR . "/" . rawurlencode($rawFileName);
-			$filepart = explode("_", $fileName);
-			try {
-				switch (count($filepart)) {
-					case 3:
-						$this->addAnnex($filepart[0], $filepart[1], $filepart[2], $fileLink, $fileName);
-						break;
-					case 5:
-						$this->addDirective($filepart[0], $filepart[1], $filepart[2], $filepart[3], $filepart[4], $fileLink, $fileName);
-						break;
-					default:
-						throw new BadDirectiveException(1, $fileName);
-				}
-			} catch (BadDirectiveException $e) {
-				$this->errors[] = $e->getMessage();
-			}
+	function __construct($docsDir) {
+		$dirFiles = Finder::findFiles("?*.*")->in($docsDir);
+		foreach ($dirFiles as $file) {
+			$this->setDirectiveType($file, $docsDir);
 		}
 		ksort($this->data);
 		foreach ($this->data as $dirnum => $dirdata) {
@@ -47,6 +28,26 @@ class CorporateDirective {
 				continue;
 			}
 			ksort($this->data[$dirnum]["annex"]);
+		}
+	}
+
+	private function setDirectiveType($file, $docsDir) {
+		$fileName = iconv("ISO8859-2", "UTF-8", $file->getFilename());
+		$filepart = explode("_", $fileName);
+		$fileLink = $docsDir . $fileName;
+		try {
+			switch (count($filepart)) {
+				case 3:
+					$this->addAnnex($filepart[0], $filepart[1], $filepart[2], $fileLink, $fileName);
+					break;
+				case 5:
+					$this->addDirective($filepart[0], $filepart[1], $filepart[2], $filepart[3], $filepart[4], $fileLink, $fileName);
+					break;
+				default:
+					throw new BadDirectiveException(1, $fileName);
+			}
+		} catch (BadDirectiveException $e) {
+			$this->errors[] = $e->getMessage();
 		}
 	}
 

@@ -8,8 +8,15 @@ use Nette,
 
 class HomepagePresenter extends Nette\Application\UI\Presenter {
 
+	public $docDir;
+
+	public function startup() {
+		parent::startup();
+		$this->docDir = $this->context->parameters['docDir'];
+	}
+
 	public function renderDefault() {
-		$directive = new CorporateDirective;
+		$directive = new CorporateDirective($this->docDir);
 		foreach ($directive->errors as $error) {
 			$this->flashMessage($error, 'error');
 		}
@@ -47,8 +54,8 @@ class HomepagePresenter extends Nette\Application\UI\Presenter {
 
 	public function succeessLoad(BaseForm $form) {
 		$file = $form['files']->getValue();
-		$fileUrl = $this->context->parameters['docsDir'] . $file->name;
-		$file->move($fileUrl);
+		$fileName = iconv("UTF-8", "ISO8859-2", $file->name);
+		$file->move($this->docDir . $fileName);
 		$this->flashMessage('Load form.', 'success');
 		$this->redirect('Homepage:');
 	}
