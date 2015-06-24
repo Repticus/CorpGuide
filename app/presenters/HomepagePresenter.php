@@ -46,16 +46,18 @@ class HomepagePresenter extends Nette\Application\UI\Presenter {
 
 	protected function createComponentLoadForm() {
 		$form = new BaseForm;
-		$form->addUpload('files', 'Směrnice');
+		$form->addMultiUpload('files', 'Směrnice');
 		$form->addSubmit('login', 'Nahrát');
 		$form->onSuccess[] = array($this, 'succeessLoad');
 		return $form;
 	}
 
 	public function succeessLoad(BaseForm $form) {
-		$file = $form['files']->getValue();
-		$fileName = iconv("UTF-8", "ISO8859-2", $file->name);
-		$file->move($this->docDir . $fileName);
+		$files = $form['files']->getValue();
+		foreach ($files as $file) {
+			$fileName = iconv("UTF-8", "ISO8859-2", $file->name);
+			$file->move($this->docDir . $fileName);
+		}
 		$this->flashMessage('Load form.', 'success');
 		$this->redirect('Homepage:');
 	}
