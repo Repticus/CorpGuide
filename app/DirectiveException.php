@@ -4,7 +4,14 @@ namespace App;
 
 use Exception;
 
-class BadDirectiveException extends Exception {
+class DirectiveException extends Exception {
+
+	const BAD_FILE_NAME = 1;
+	const BAD_FILE_EXTENSION = 2;
+	const BAD_DIRECTIVE_DATE = 3;
+	const BAD_ANNEX_NUMBER = 4;
+	const BAD_DIRECTIVE_NUMBER = 5;
+	const BAD_DIRECTIVE_LINK = 6;
 
 	function __construct($code, $filename) {
 		$message = "Soubor <strong>$filename</strong> byl vyřazen ze seznamu směrnic.";
@@ -28,9 +35,9 @@ class BadDirectiveException extends Exception {
 				$message .= " K této příloze nebyla nalezena směrnice s odpovídajícím číslem.";
 				break;
 			default:
-				$message = "Nedefinovaná chyba";
+				$message = "Nedefinovaná chyba.";
 		}
-		parent::__construct($message, $code, NULL);
+		parent::__construct($message, $code);
 	}
 
 }

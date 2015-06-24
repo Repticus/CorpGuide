@@ -10,7 +10,7 @@ class CorporateDirective {
 	public $errors = array();
 
 	function __construct($docsDir) {
-		$dirFiles = Finder::findFiles("?*.*")->in($docsDir);
+		$dirFiles = Finder::findFiles("*_*_*.*?")->in($docsDir);
 		foreach ($dirFiles as $file) {
 			$this->setDirectiveType($file, $docsDir);
 		}
@@ -20,8 +20,8 @@ class CorporateDirective {
 				unset($this->data[$dirnum]);
 				foreach ($dirdata["annex"] as $anxnum => $anxdata) {
 					try {
-						throw new BadDirectiveException(6, $anxdata["file"]);
-					} catch (BadDirectiveException $e) {
+						throw new DirectiveException(DirectiveException::BAD_DIRECTIVE_LINK, $anxdata["file"]);
+					} catch (DirectiveException $e) {
 						$this->errors[] = $e->getMessage();
 					}
 				}
@@ -44,16 +44,16 @@ class CorporateDirective {
 					$this->addDirective($filepart[0], $filepart[1], $filepart[2], $filepart[3], $filepart[4], $fileLink, $fileName);
 					break;
 				default:
-					throw new BadDirectiveException(1, $fileName);
+					throw new DirectiveException(DirectiveException::BAD_FILE_NAME, $fileName);
 			}
-		} catch (BadDirectiveException $e) {
+		} catch (DirectiveException $e) {
 			$this->errors[] = $e->getMessage();
 		}
 	}
 
 	private function addDirective($directive, $date, $change, $revision, $name, $link, $file) {
 		if (isset($this->data[$directive]["name"])) {
-			throw new BadDirectiveException(5, $file);
+			throw new DirectiveException(DirectiveException::BAD_DIRECTIVE_NUMBER, $file);
 		}
 		$date = $this->setDate($date, $file);
 		$name = $this->setName($name, $file);
@@ -75,7 +75,7 @@ class CorporateDirective {
 	private function addAnnex($directive, $annex, $name, $link, $file) {
 		$name = $this->setName($name, $file);
 		if (isset($this->data[$directive]["annex"][$annex])) {
-			throw new BadDirectiveException(4, $file);
+			throw new DirectiveException(DirectiveException::BAD_ANNEX_NUMBER, $file);
 		} else {
 			$this->data[$directive]["annex"][$annex] = array(
 				 "name" => $name,
@@ -88,7 +88,7 @@ class CorporateDirective {
 	private function setDate($date, $fileName) {
 		$date = strtotime($date);
 		if (!$date) {
-			throw new BadDirectiveException(3, $fileName);
+			throw new DirectiveException(DirectiveException::BAD_DIRECTIVE_DATE, $fileName);
 		}
 		return $date;
 	}
@@ -96,7 +96,7 @@ class CorporateDirective {
 	private function setName($name, $fileName) {
 		$filepart = explode(".", $name);
 		if (count($filepart) < 2) {
-			throw new BadDirectiveException(2, $fileName);
+			throw new DirectiveException(DirectiveException::BAD_FILE_EXTENSION, $fileName);
 		}
 		array_pop($filepart);
 		return implode(".", $filepart);
