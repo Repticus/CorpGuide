@@ -11,8 +11,8 @@
 	<body>
 		<div id="head">
 			{if $user->loggedIn}
-				{control loadForm}
-				{form logOutForm}
+				{control uploadDocument}
+				{form logOut}
 					<table>
 						<tr>
 							<td>
@@ -30,7 +30,7 @@
 					</table>
 				{/form}
 			{else}
-				{control loginForm}
+				{control logIn}
 			{/if}
 			<div class="clr"></div>
 		</div>

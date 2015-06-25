@@ -23,7 +23,7 @@ class HomepagePresenter extends Nette\Application\UI\Presenter {
 		$this->template->directive = $directive->data;
 	}
 
-	protected function createComponentLoginForm() {
+	protected function createComponentLogIn() {
 		$form = new BaseForm;
 		$form->addText('user', 'Login');
 		$form->addPassword('password', 'Heslo');
@@ -44,15 +44,15 @@ class HomepagePresenter extends Nette\Application\UI\Presenter {
 		}
 	}
 
-	protected function createComponentLoadForm() {
+	protected function createComponentUploadDocument() {
 		$form = new BaseForm;
 		$form->addMultiUpload('files', 'Směrnice');
 		$form->addSubmit('login', 'Nahrát');
-		$form->onSuccess[] = array($this, 'succeessLoad');
+		$form->onSuccess[] = array($this, 'succeessUploadDocument');
 		return $form;
 	}
 
-	public function succeessLoad(BaseForm $form) {
+	public function succeessUploadDocument(BaseForm $form) {
 		$files = $form['files']->getValue();
 		foreach ($files as $file) {
 			$fileName = iconv("UTF-8", "ISO8859-2", $file->name);
@@ -62,7 +62,7 @@ class HomepagePresenter extends Nette\Application\UI\Presenter {
 		$this->redirect('Homepage:');
 	}
 
-	protected function createComponentLogOutForm() {
+	protected function createComponentLogOut() {
 		$form = new BaseForm;
 		$form->addSubmit('logout', 'Odhlásit');
 		$form->onSuccess[] = array($this, 'succeessLogOut');
