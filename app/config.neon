@@ -1,5 +1,11 @@
 parameters:
-	docDir: "doc/" # Directory where are directive ducuments
+	docDir: "doc" # Directory where are directive ducuments stored
+	docExt: ["doc", "docx", "xls", "xlsx", "pdf"] # Allowed file extensions for loaded ducuments. Array with extensions without dots.
+	fileSize: "10M" # Max uploaded file size in bytes optionaly with sign K (kB), M (MB) or G (GB).
+
+database:
+	default:
+		dsn: "sqlite:../database/smernice"
 
 php:
 	date.timezone: Europe/Prague
@@ -14,7 +20,8 @@ session:
 
 services:
 	router: App\RouterFactory::createRouter
+	database: @Nette\Database\Context
 
 security:
 	users:
-		Admin: admin # Set admin password and other users in config.local.neon
+		Admin: kernel # Set admin password and other users in config.local.neon

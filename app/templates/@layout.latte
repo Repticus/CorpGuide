@@ -11,8 +11,7 @@
 	<body>
 		<div id="head">
 			{if $user->loggedIn}
-				{control uploadDocument}
-				{form logOut}
+				<form>
 					<table>
 						<tr>
 							<td>
@@ -24,25 +23,24 @@
 						</tr>
 						<tr>
 							<td colspan="2">
-								{input logout}
+								{$presenter->showLogoutButton()}
 							</td>
 						</tr>
 					</table>
-				{/form}
+				</form>
 			{else}
 				{control logIn}
 			{/if}
 			<div class="clr"></div>
 		</div>
-		<div n:foreach="$flashes as $flash" class="flash {$flash->type}">{$flash->message|noescape}</div>
-
+		<h1 n:block=title>Seznam platných směrnic GLOBAL ASSISTANCE a.s.</h1>
 		{block content|indent:2}
 		{/block}
-
-		{block scripts}
+		<div n:foreach="$flashes as $flash" class="flash {$flash->type}">{$flash->message|noescape}</div>
+		{*block scripts}
 		<script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
 		<script src="//nette.github.io/resources/js/netteForms.min.js"></script>
 		<script src="{$basePath}/javascript.js"></script>
-		{/block}
+		{/block*}
 	</body>
 </html>

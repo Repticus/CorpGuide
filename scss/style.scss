@@ -45,17 +45,13 @@ a{
 		float: right;
 	}
 }
-.format{
-	display: block;
-	width: 600px;
-	margin: 20px auto;
-	text-align:center;
-}
 table.direction{
 	margin: 20px auto;
 	border-collapse: collapse;
-	background-color: #bebfc4;
-	tr:nth-child(even) {
+	tr.odd{
+		background-color: #bebfc4;
+	}
+	tr.even{
 		background-color: #d9d9d9;
 	}
 	th{
@@ -72,11 +68,14 @@ table.direction{
 		vertical-align: top;
 		border: 1px #21201d solid;
 	}
-	td:nth-child(3) {
+	td.tools {
+		text-align: right;
+	}
+	td.name {
 		text-align: left;
 	}
-	td:nth-child(4) {
-		text-align: right;
+	td.annex a {
+		margin-left: 16px;
 	}
 }
 .clr{

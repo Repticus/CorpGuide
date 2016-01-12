@@ -46,19 +46,14 @@ a {
   float: right;
 }
 
-.format {
-  display: block;
-  width: 600px;
-  margin: 20px auto;
-  text-align: center;
-}
-
 table.direction {
   margin: 20px auto;
   border-collapse: collapse;
+}
+table.direction tr.odd {
   background-color: #bebfc4;
 }
-table.direction tr:nth-child(even) {
+table.direction tr.even {
   background-color: #d9d9d9;
 }
 table.direction th {
@@ -75,11 +70,14 @@ table.direction td {
   vertical-align: top;
   border: 1px #21201d solid;
 }
-table.direction td:nth-child(3) {
+table.direction td.tools {
+  text-align: right;
+}
+table.direction td.name {
   text-align: left;
 }
-table.direction td:nth-child(4) {
-  text-align: right;
+table.direction td.annex a {
+  margin-left: 16px;
 }
 
 .clr {

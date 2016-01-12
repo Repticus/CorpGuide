@@ -1,0 +1,51 @@
+<form n:tag-if="$action" n:name="$action">
+	<table class="direction">
+		<tr>
+			<th style="width:40px">Poř.<br />číslo</th>
+			<th style="width:70px">Číslo<br />směrnice</th>
+			<th style="width:70px" n:if="$tools">Editační<br />nástroje</th>
+			<th style="width:330px">Název směrnice<br />přílohy směrnice</th>
+			<th style="width:80px">Datum<br />schválení</th>
+			<th style="width:50px">Číslo<br />změny</th>
+			<th style="width:50px">Číslo<br />revize</th>
+		</tr>
+		{foreach $control->getComponents(FALSE, 'Directive') as $directive}
+			{var $class = $iterator->odd ? "odd" : "even"}
+			{var $count = $directive->getAnnexCount()}
+			{var $rowspan = $count ? $count + 1 : NULL;}
+			<tr n:class="$class">
+				<td n:attr="rowspan=>$rowspan">
+					{$directive->showField("order")}
+				</td>
+				<td n:attr="rowspan=>$rowspan">
+					{$directive->showField("id")}
+				</td>
+				<td class="tools" n:if="$tools">
+					{$directive->showTools()}
+				</td>
+				<td n:class="name">
+					{$directive->showField("title")}
+				</td>
+				<td n:attr="rowspan=>$rowspan">
+					{$directive->showField("date")}
+				</td>
+				<td n:attr="rowspan=>$rowspan">
+					{$directive->showField("change")}
+				</td>
+				<td n:attr="rowspan=>$rowspan">
+					{$directive->showField("revision")}
+				</td>
+			</tr>
+			{foreach $directive->getComponents(FALSE, "Annex") as $annex}
+				<tr class="{$class}">
+					<td n:class="tools" n:if="$tools">
+						{$annex->showTools()}
+					</td>
+					<td n:class="name, annex">
+						{$annex->showField("title")}
+					</td>
+				</tr>
+			{/foreach}
+		{/foreach}
+	</table>
+</form>
