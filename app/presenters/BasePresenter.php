@@ -3,7 +3,6 @@
 namespace App\Presenters;
 
 use DirList,
-	 Exception,
 	 DirectiveException,
 	 Nette\Database\Context,
 	 Nette\Application\UI\Presenter;
@@ -30,9 +29,6 @@ abstract class BasePresenter extends Presenter {
 	public function startup() {
 		parent::startup();
 		$this->setDocDir();
-		$this->setPostLimit();
-		$this->checkPostLimit();
-		$this->setFileLimit();
 	}
 
 	/**
@@ -50,88 +46,15 @@ abstract class BasePresenter extends Presenter {
 	 * @return void
 	 */
 	private function setDocDir() {
-		try {
-			$docDir = $this->context->parameters['docDir'];
-			if (!$docDir) {
-				throw new DirectiveException(DirectiveException::DOCDIR_NOT_SET);
-			}
-			$path = ROOT . "/" . $docDir;
-			if (!is_dir($path)) {
-				throw new DirectiveException(DirectiveException::DOCDIR_NOT_EXISTS, array($path));
-			}
-			$this->docDir = $docDir;
-		} catch (DirectiveException $e) {
-			$this->docDir = FALSE;
-			$this->flashMessage($e->getFlashMessage(), 'error');
+		$docDir = $this->context->parameters['docDir'];
+		if (!$docDir) {
+			throw new DirectiveException(DirectiveException::DOCDIR_NOT_SET);
 		}
-	}
-
-	/**
-	 * Sets a data size limit in bytes for post method.
-	 * @param void
-	 * @return void
-	 */
-	private function setPostLimit() {
-		try {
-			$postLimit = $this->convertToBytes(ini_get('post_max_size'));
-			if (!$postLimit) {
-				throw new DirectiveException(DirectiveException::PHP_POST_SIZE_NOT_SET);
-			}
-			$memLimit = $this->convertToBytes(ini_get('memory_limit'));
-			$this->postLimit = min($postLimit, $memLimit);
-		} catch (DirectiveException $e) {
-			$this->postLimit = FALSE;
-			$this->flashMessage($e->getFlashMessage(), 'error');
+		$path = ROOT . "/" . $docDir;
+		if (!is_dir($path)) {
+			throw new DirectiveException(DirectiveException::DOCDIR_NOT_EXISTS, array($path));
 		}
-	}
-
-	/**
-	 * Sets a file size limit in bytes for uploaded files.
-	 * @param void
-	 * @return void
-	 */
-	private function setFileLimit() {
-		try {
-			if (!$this->postLimit) {
-				throw new DirectiveException(DirectiveException::POST_LIMIT_NOT_SET);
-			}
-			$phpLimit = $this->convertToBytes(ini_get('upload_max_filesize'));
-			if (!$phpLimit) {
-				throw new DirectiveException(DirectiveException::PHP_FILE_SIZE_NOT_SET);
-			}
-			$appLimit = $this->context->parameters['fileSize'];
-			if ($appLimit) {
-				$appLimit = $this->convertToBytes($appLimit);
-				if (!$appLimit) {
-					throw new DirectiveException(DirectiveException::FILE_LIMIT_NOT_SET);
-				}
-				$this->fileLimit = min($phpLimit, $appLimit, $this->postLimit);
-			} else {
-				$this->fileLimit = min($phpLimit, $this->postLimit);
-			}
-		} catch (DirectiveException $e) {
-			$this->fileLimit = FALSE;
-			$this->flashMessage($e->getFlashMessage(), 'error');
-		}
-	}
-
-	/**
-	 * Check if data sent to server does not exceed maximum allowed limit.
-	 * @param void
-	 * @return boolean return true if limit was not exceeded.
-	 */
-	private function checkPostLimit() {
-		try {
-			$postData = (int) filter_input(INPUT_SERVER, 'CONTENT_LENGTH', FILTER_SANITIZE_SPECIAL_CHARS);
-			if ($postData > $this->postLimit) {
-				$limit = $this->convertToUnits($this->postLimit);
-				throw new DirectiveException(DirectiveException::PHP_POST_SIZE_EXCEEDED, array($limit));
-			}
-			return TRUE;
-		} catch (DirectiveException $e) {
-			$this->flashMessage($e->getMessage(), 'error');
-			return FALSE;
-		}
+		$this->docDir = $docDir;
 	}
 
 	/**
@@ -158,7 +81,7 @@ abstract class BasePresenter extends Presenter {
 	 */
 	public function convertToUnits($value, $digits = NULL) {
 		if (!(is_int($value) or is_float($value)) or $value < 0) {
-			throw new Exception("Parameter [number] must be a integer or float equal or bigger than zero.");
+			throw new DirectiveException(DirectiveException::CONVERT_UNITS_BAD_VALUE);
 		}
 		$units = array(" B", " kB", " MB", " GB", " TB");
 		foreach ($units as $unit) {
@@ -183,7 +106,7 @@ abstract class BasePresenter extends Presenter {
 			return $number;
 		}
 		if (!is_int($digits) or $digits < 0) {
-			throw new Exception("Parameter [digits] must be a integer equal or bigger than zero.");
+			throw new DirectiveException(DirectiveException::CONVERT_UNITS_BAD_DIGITS);
 		}
 		$part = explode(".", $number);
 		$part[1] = substr($part[1], 0, $digits);
