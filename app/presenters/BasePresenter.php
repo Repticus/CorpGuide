@@ -157,27 +157,40 @@ abstract class BasePresenter extends Presenter {
 	 * @return string converted number complemented with units.
 	 */
 	public function convertToUnits($value, $digits = NULL) {
-		if ($digits and ( !is_int($digits) or $digits < 0)) {
-			throw new Exception("Parameter [digits] must be a integer equal or bigger than zero.");
+		if (!(is_int($value) or is_float($value)) or $value < 0) {
+			throw new Exception("Parameter [number] must be a integer or float equal or bigger than zero.");
 		}
-
 		$units = array(" B", " kB", " MB", " GB", " TB");
 		foreach ($units as $unit) {
 			if ($value < 1024) {
 				if (isset($digits)) {
-					$numPart = explode(".", $value);
-					if (isset($numPart[1])) {
-						$numPart[1] = substr($numPart[1], 0, $digits);
-						if (!(int) $numPart[1]) {
-							unset($numPart[1]);
-						}
-						$value = implode(".", $numPart);
-					}
+					$value = $this->cutDecimalNumber($value, $digits);
 				}
 				return $value . $unit;
 			}
 			$value /= 1024;
 		}
+	}
+
+	/**
+	 * Cut down decimal number on given number of digits.
+	 * @param integer|float $number number to cut down
+	 * @param integer $digits number of decimal digits to cut down
+	 * @return integer|float
+	 */
+	public function cutDecimalNumber($number, $digits) {
+		if (is_int($number)) {
+			return $number;
+		}
+		if (!is_int($digits) or $digits < 0) {
+			throw new Exception("Parameter [digits] must be a integer equal or bigger than zero.");
+		}
+		$part = explode(".", $number);
+		$part[1] = substr($part[1], 0, $digits);
+		if (!(int) $part[1]) {
+			unset($part[1]);
+		}
+		return implode(".", $part);
 	}
 
 }
