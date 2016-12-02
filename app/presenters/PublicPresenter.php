@@ -16,7 +16,7 @@ class PublicPresenter extends BasePresenter {
 
 	/**
 	 * Creates a login form component.
-	 * @param  void
+	 * @param void
 	 * @return object Nette\Application\UI\Form
 	 */
 	protected function createComponentLogIn() {
@@ -30,7 +30,7 @@ class PublicPresenter extends BasePresenter {
 
 	/**
 	 * Process login form.
-	 * @param  void
+	 * @param void
 	 * @return void
 	 */
 	public function succeessLogin(Form $form) {

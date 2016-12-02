@@ -16,6 +16,7 @@ class Annex extends Control {
 	public $document;
 	public $extension;
 	public $form;
+	public $row;
 	public $edit = FALSE;
 	public $upload = FALSE;
 
@@ -26,6 +27,7 @@ class Annex extends Control {
 		$this->title = $annexRow->title;
 		$this->document = $annexRow->document ? $annexRow->document : NULL;
 		$this->extension = $this->getFileExtension($this->document);
+		$this->row = $annexRow;
 	}
 
 	public function handleEdit() {
@@ -132,10 +134,6 @@ class Annex extends Control {
 	 */
 	public function setField($field, $value = NULL) {
 		switch ($field) {
-			case "document":
-				$value = $this->getDocName();
-				$this->renameDocument($value);
-				break;
 			case "extension":
 				$value = $this->getFileExtension($value);
 				break;
@@ -227,12 +225,7 @@ class Annex extends Control {
 		}
 		$oldName = $docDir . "/" . $this->document;
 		$newName = $docDir . "/" . $name;
-//		if (file_exists($oldName)) {
-//		}
-//		if (count($filepart) < 2) {
-//			throw new DirectiveException(DirectiveException::BAD_FILE_EXTENSION, $fileName);
-//		}
-//		return $rename ? TRUE : FALSE;
+		rename($oldName, $newName);
 	}
 
 	/**
@@ -282,10 +275,16 @@ class Annex extends Control {
 	public function formEditSave(Form $form) {
 		$data = $form->getValues();
 		$this->setField("title", $data->title);
+		$fields = array('title' => $this->title);
 		if ($this->isSetDocument()) {
-			$this->setField("document");
+			$docName = $this->getDocName();
+			$this->renameDocument($docName);
+			$this->setField("document", $docName);
+			$fields['document'] = $this->document;
 		}
+		$this->row->update($fields);
 		$this->presenter->flashMessage('Data byla aktualizována.', 'success');
+		$this->redirect("this");
 	}
 
 	/**
