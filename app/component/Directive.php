@@ -45,7 +45,7 @@ class Directive extends Annex {
 	 * @param void
 	 * @return void
 	 */
-	protected function getDocName() {
+	protected function setDocName($extension = NULL) {
 		return Strings::webalize($this->id . "_" . $this->title, '_', false) . "." . $this->extension;
 	}
 

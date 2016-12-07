@@ -15,6 +15,7 @@ class DirectiveException extends Exception {
 	const POST_LIMIT_NOT_SET = 7;
 	const CONVERT_UNITS_BAD_VALUE = 8;
 	const CONVERT_UNITS_BAD_DIGITS = 9;
+	const DOCUMENT_NOT_SET = 11;
 
 	function __construct($code, $data = array()) {
 		$message = $this->getDirectiveMessage($code, $data);
@@ -32,6 +33,7 @@ class DirectiveException extends Exception {
 			case 7: return "Hodnota [postLimit] v aplikaci nebyla nastavena.";
 			case 8: return "Chybná hodnota parametru [value]. Hodnota musí být typu integer nebo float a musí být rovna nebo větší než nula.";
 			case 9: return "Chybná hodnota parametru [digits]. Hodnota musí být typu integer a musí být rovna nebo větší než nula.";
+			case 11: return "Název souboru dokumentu není nastaven.";
 			default : return "Nedefinovaná chyba.";
 		}
 	}

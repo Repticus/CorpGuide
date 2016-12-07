@@ -1,6 +1,8 @@
 parameters:
+	# Allowed file extensions for loaded ducuments. Array with extensions without dots.
+	# For allowing files without extension set NULL value.
+	docExt: ["doc", "docx", "xls", "xlsx", "pdf"]
 	docDir: "doc" # Directory where are directive ducuments stored
-	docExt: ["doc", "docx", "xls", "xlsx", "pdf"] # Allowed file extensions for loaded ducuments. Array with extensions without dots.
 	fileSize: "10M" # Max uploaded file size in bytes optionaly with sign K (kB), M (MB) or G (GB).
 
 database:

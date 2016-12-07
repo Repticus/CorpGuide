@@ -26,7 +26,6 @@ class Annex extends Control {
 		$this->order = $annexRow->order;
 		$this->title = $annexRow->title;
 		$this->document = $annexRow->document ? $annexRow->document : NULL;
-		$this->extension = $this->getFileExtension($this->document);
 		$this->row = $annexRow;
 	}
 
@@ -116,38 +115,15 @@ class Annex extends Control {
 				if ($this->upload) {
 					return $this->form["file"]->getControl();
 				}
-				if ($this->isSetDocument()) {
+				if ($this->document) {
 					return Html::el('a')
+										 ->addAttributes(array('target' => '_blank'))
 										 ->href($this->presenter->docDir . "/" . $this->document)
 										 ->setHtml($this->getTitle());
 				}
 				return $this->getTitle();
 		}
 		return $this->edit ? $this->form[$field]->getControl() : $this->$field;
-	}
-
-	/**
-	 * Sets given field value.
-	 * @param string $field field name
-	 * @param mixed $value field value
-	 * @return void
-	 */
-	public function setField($field, $value = NULL) {
-		switch ($field) {
-			case "extension":
-				$value = $this->getFileExtension($value);
-				break;
-		}
-		$this->$field = $value;
-	}
-
-	/**
-	 * Checks if document is set.
-	 * @param void
-	 * @return boolean
-	 */
-	protected function isSetDocument() {
-		return $this->document ? TRUE : FALSE;
 	}
 
 	/**
@@ -160,72 +136,40 @@ class Annex extends Control {
 	}
 
 	/**
-	 * Gets a file name for annex document.
+	 * Gets a file name part for annex document without extension.
 	 * @param void
-	 * @return void
+	 * @return string.
 	 */
 	protected function getDocName() {
-		return Strings::webalize($this->id . "_" . $this->getTitle(), '_', false) . "." . $this->extension;
+		return Strings::webalize($this->id . "_" . $this->getTitle(), '_', false);
 	}
 
 	/**
 	 * Gets a extension from file name.
 	 * @param  string $fileName full file name
-	 * @return string|null Return file extension or null.
+	 * @return string|NULL Returns file extension or NULL if file has no extension.
 	 */
-	public function getFileExtension($fileName) {
+	public function getDocExtension($fileName) {
 		$filepart = pathinfo($fileName);
-		return isset($filepart['extension']) ? $filepart['extension'] : NULL;
+		if (!isset($filepart['extension'])) {
+			return NULL;
+		}
+		return $filepart['extension'];
 	}
 
 	/**
-	 * Saves a uploaded document to storage directory.
-	 * @param  object $file object of Nette\Http\FileUpload
-	 * @return boolean return true if save was succesfull
+	 * Sets full file name for annex document. If $extension is not set, it will be obtained from the $document property.
+	 * @param string $extension file extension
+	 * @return string Return file name.
 	 */
-	public function saveDocument(FileUpload $file) {
-		$docdir = $this->presenter->docDir;
-		if (!$docdir or ! $this->document) {
-			$this->presenter->flashMessage('Dokument nelze uložit. Je potřeba nastavit parametr docDir a nazev dokumentu.', 'error');
-			return FALSE;
+	protected function setDocName($extension = NULL) {
+		if (!$extension) {
+			if (!$this->document) {
+				throw new DirectiveException(DirectiveException::DOCUMENT_NOT_SET);
+			}
+			$extension = $this->getDocExtension($this->document);
 		}
-		$newFile = $docdir . "/" . $this->document;
-		$file->move($newFile);
-		return TRUE;
-	}
-
-	/**
-	 * Deletes a document from storage directory.
-	 * @param  void
-	 * @return boolean return true if delete was succesfull
-	 */
-	public function deleteDocument() {
-		$docdir = $this->presenter->docDir;
-		if (!$docdir or ! $this->document) {
-			$this->presenter->flashMessage('Dokument nelze vymazat. Je potřeba nastavit parametr docDir a nazev dokumentu.', 'error');
-			return FALSE;
-		}
-		$oldFile = $docdir . "/" . $this->document;
-		if (file_exists($oldFile)) {
-			return unlink($oldFile);
-		}
-		return FALSE;
-	}
-
-	/**
-	 * Renames a document in storage directory.
-	 * @param string $name new name for document
-	 * @return boolean return true if rename was succesfull
-	 */
-	public function renameDocument($name) {
-		$docDir = $this->presenter->docDir;
-		if (!$docDir or ! $this->document) {
-			$this->presenter->flashMessage('Dokument nelze přejmenovat. Parametry docDir a název dokumentu musí být nastaveny.', 'error');
-			return FALSE;
-		}
-		$oldName = $docDir . "/" . $this->document;
-		$newName = $docDir . "/" . $name;
-		rename($oldName, $newName);
+		$this->document = $this->getDocName() . "." . $extension;
 	}
 
 	/**
@@ -252,14 +196,11 @@ class Annex extends Control {
 	protected function createComponentFormUpload() {
 		$form = new Form;
 		$extList = $this->presenter->docExt;
-		if ($extList) {
-			$extError = 'Přípona dokumentu může být typu ' . implode(", ", $extList) . '.';
-		} else {
-			$extError = 'Je nutné definovat seznam povolených typů dokumentů. Nastavte parametr docExt v config.neon.';
-		}
+		$extError = 'Přípona dokumentu může být typu ' . implode(", ", $extList) . '.';
 		$fileLimit = $this->presenter->fileLimit;
 		$fileLimitText = $this->presenter->convertToUnits($fileLimit, 2);
 		$form->addUpload('file', 'Dokument')
+				  ->setRequired('Pole %label musí být vyplněno.')
 				  ->addRule(array($this, 'checkFileExtension'), $extError, $extList)
 				  ->addRule(Form::MAX_FILE_SIZE, 'Maximální velikost souboru je ' . $fileLimitText . '.', $fileLimit);
 		$form->addSubmit('save', 'S');
@@ -274,16 +215,14 @@ class Annex extends Control {
 	 */
 	public function formEditSave(Form $form) {
 		$data = $form->getValues();
-		$this->setField("title", $data->title);
-		$fields = array('title' => $this->title);
-		if ($this->isSetDocument()) {
-			$docName = $this->getDocName();
-			$this->renameDocument($docName);
-			$this->setField("document", $docName);
-			$fields['document'] = $this->document;
+		$this->title = $data->title;
+		if ($this->document) {
+			$oldName = $this->document;
+			$this->setDocName();
+			$this->renameDocFile($oldName, $this->document);
 		}
-		$this->row->update($fields);
-		$this->presenter->flashMessage('Data byla aktualizována.', 'success');
+		$this->row->update(array('title' => $this->title, 'document' => $this->document));
+		$this->presenter->flashMessage('Příloha směrnice byla aktualizována.', 'success');
 		$this->redirect("this");
 	}
 
@@ -293,11 +232,15 @@ class Annex extends Control {
 	 */
 	public function formUploadSave(Form $form) {
 		$data = $form->getValues();
-		$this->deleteDocument();
-		$this->setField("extension", $data->file->name);
-		$this->setField("document");
-		$this->saveDocument($data->file);
-		$this->presenter->flashMessage('Dokument byl aktualizován.', 'success');
+		if ($this->document) {
+			$this->deleteDocFile();
+		}
+		$extension = $this->getDocExtension($data->file->name);
+		$this->setDocName($extension);
+		$this->uploadDocFile($data->file);
+		$this->row->update(array('document' => $this->document));
+		$this->presenter->flashMessage('Příloha směrnice byla aktualizována.', 'success');
+		$this->redirect("this");
 	}
 
 	/**
@@ -320,14 +263,57 @@ class Annex extends Control {
 	}
 
 	/**
+	 * Moves a uploaded document file to storage directory.
+	 * @param  object $file object of Nette\Http\FileUpload
+	 * @return void
+	 */
+	public function uploadDocFile(FileUpload $file) {
+		$docdir = $this->presenter->docDir;
+		if (!$this->document) {
+			throw new DirectiveException(DirectiveException::DOCUMENT_NOT_SET);
+		}
+		$newFile = $docdir . "/" . $this->document;
+		$file->move($newFile);
+	}
+
+	/**
+	 * Renames a document file in storage directory.
+	 * @param string $oldName old document name
+	 * @param string $newName new document name
+	 * @return void
+	 */
+	public function renameDocFile($oldName, $newName) {
+		$docDir = $this->presenter->docDir;
+		$oldName = $docDir . "/" . $oldName;
+		$newName = $docDir . "/" . $newName;
+		rename($oldName, $newName);
+	}
+
+	/**
+	 * Deletes a document file from storage directory.
+	 * @param  void
+	 * @return void
+	 */
+	public function deleteDocFile() {
+		$docdir = $this->presenter->docDir;
+		if (!$this->document) {
+			throw new DirectiveException(DirectiveException::DOCUMENT_NOT_SET);
+		}
+		$file = $docdir . "/" . $this->document;
+		if (file_exists($file)) {
+			unlink($file);
+		}
+	}
+
+	/**
 	 * Checks if uploaded file extension is in allowed extensions list.
 	 * @param  object $file object of Nette\Forms\Controls\UploadControl
 	 * @param  array $extList list of allowed extensions without dots
 	 * @return boolean return true if uploaded file extension is in allowed list
 	 */
 	public function checkFileExtension(UploadControl $file, $extList) {
-		$fileExt = $this->getFileExtension($file->value->name);
-		if ($fileExt && in_array($fileExt, $extList)) {
+		$fileExt = $this->getDocExtension($file->value->name);
+		if (in_array($fileExt, $extList)) {
 			return TRUE;
 		}
 		return FALSE;
