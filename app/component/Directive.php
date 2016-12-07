@@ -2,8 +2,7 @@
 
 use Nette\Application\UI\Form,
 	 Nette\Forms\Controls\TextInput,
-	 Nette\Database\Table\ActiveRow,
-	 Nette\Utils\Strings;
+	 Nette\Database\Table\ActiveRow;
 
 class Directive extends Annex {
 
@@ -38,15 +37,6 @@ class Directive extends Annex {
 	 */
 	protected function getTitle() {
 		return $this->title;
-	}
-
-	/**
-	 * Gets a file name for uploaded directive document.
-	 * @param void
-	 * @return void
-	 */
-	protected function setDocName($extension = NULL) {
-		return Strings::webalize($this->id . "_" . $this->title, '_', false) . "." . $this->extension;
 	}
 
 	/**
@@ -104,15 +94,39 @@ class Directive extends Annex {
 	 */
 	public function formEditSave(Form $form) {
 		$data = $form->getValues();
-		$this->setField("id", $data->id);
-		$this->setField("title", $data->title);
-		$this->setField("date", $data->date);
-		$this->setField("change", $data->change);
-		$this->setField("revision", $data->revision);
-		if ($this->isSetDocument()) {
-			$this->setField("document");
+		$this->id = $data->id;
+		$this->title = $data->title;
+		$this->date = $data->date;
+		$this->change = $data->change;
+		$this->revision = $data->revision;
+		$oldName = $this->document;
+		$this->setDocument();
+		try {
+			$this->row->update(array(
+				 'id' => $this->id,
+				 'title' => $this->title,
+				 'date' => $this->date,
+				 'change' => $this->change,
+				 'revision' => $this->revision,
+				 'document' => $this->document
+			));
+			if ($oldName) {
+				$this->renameDocFile($oldName, $this->document);
+			}
+			foreach ($this->getComponents(FALSE, "Annex") as $annex) {
+				$annex->id = $this->id;
+				$annex->updateData();
+			}
+			$this->presenter->flashMessage('Směrnice byla aktualizována.', 'success');
+			$this->redirect('this');
+		} catch (Nette\Application\AbortException $e) {
+			throw $e;
+		} catch (Exception $ex) {
+			if ($ex->getCode() == 23000) {
+				$this->presenter->flashMessage('Zadané číslo směrnice již existuje. ', 'error');
+				$this->handleEdit();
+			}
 		}
-		$this->presenter->flashMessage('Data byla aktualizována.', 'success');
 	}
 
 	/**

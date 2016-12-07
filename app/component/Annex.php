@@ -93,12 +93,11 @@ class Annex extends Control {
 	 * @return object Nette\Utils\Html
 	 */
 	public function createButton($value, $link) {
-		$element = Html::el('input')->addAttributes(array(
-			 'type' => 'button',
-			 'value' => $value,
-			 'onClick' => "parent.location='$link'"
+		return Html::el('input')->addAttributes(array(
+						'type' => 'button',
+						'value' => $value,
+						'onClick' => "parent.location='$link'"
 		));
-		return $element;
 	}
 
 	/**
@@ -136,15 +135,6 @@ class Annex extends Control {
 	}
 
 	/**
-	 * Gets a file name part for annex document without extension.
-	 * @param void
-	 * @return string.
-	 */
-	protected function getDocName() {
-		return Strings::webalize($this->id . "_" . $this->getTitle(), '_', false);
-	}
-
-	/**
 	 * Gets a extension from file name.
 	 * @param  string $fileName full file name
 	 * @return string|NULL Returns file extension or NULL if file has no extension.
@@ -162,14 +152,14 @@ class Annex extends Control {
 	 * @param string $extension file extension
 	 * @return string Return file name.
 	 */
-	protected function setDocName($extension = NULL) {
+	protected function setDocument($extension = NULL) {
 		if (!$extension) {
 			if (!$this->document) {
 				throw new DirectiveException(DirectiveException::DOCUMENT_NOT_SET);
 			}
 			$extension = $this->getDocExtension($this->document);
 		}
-		$this->document = $this->getDocName() . "." . $extension;
+		$this->document = Strings::webalize($this->id . "_" . $this->getTitle(), '_', false) . "." . $extension;
 	}
 
 	/**
@@ -213,15 +203,27 @@ class Annex extends Control {
 	 * Process annex edit form.
 	 * @param  void
 	 */
+	public function updateData() {
+		$oldName = $this->document;
+		$this->setDocument();
+		$this->row->update(array(
+			 'id' => $this->id,
+			 'title' => $this->title,
+			 'document' => $this->document
+		));
+		if ($oldName) {
+			$this->renameDocFile($oldName, $this->document);
+		}
+	}
+
+	/**
+	 * Process annex edit form.
+	 * @param  void
+	 */
 	public function formEditSave(Form $form) {
 		$data = $form->getValues();
 		$this->title = $data->title;
-		if ($this->document) {
-			$oldName = $this->document;
-			$this->setDocName();
-			$this->renameDocFile($oldName, $this->document);
-		}
-		$this->row->update(array('title' => $this->title, 'document' => $this->document));
+		$this->updateData();
 		$this->presenter->flashMessage('Příloha směrnice byla aktualizována.', 'success');
 		$this->redirect("this");
 	}
@@ -236,7 +238,7 @@ class Annex extends Control {
 			$this->deleteDocFile();
 		}
 		$extension = $this->getDocExtension($data->file->name);
-		$this->setDocName($extension);
+		$this->setDocument($extension);
 		$this->uploadDocFile($data->file);
 		$this->row->update(array('document' => $this->document));
 		$this->presenter->flashMessage('Příloha směrnice byla aktualizována.', 'success');

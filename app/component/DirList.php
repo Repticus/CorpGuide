@@ -8,7 +8,7 @@ class DirList extends Control {
 
 	function __construct($database) {
 		parent::__construct();
-		$dirData = $database->table('directive')->order('order');
+		$dirData = $database->getDirectives();
 		foreach ($dirData as $dirRow) {
 			$directive = new Directive($dirRow);
 			$this->addComponent($directive, "dir" . $dirRow->order);
