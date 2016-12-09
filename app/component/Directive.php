@@ -10,12 +10,13 @@ class Directive extends Annex {
 	public $change;
 	public $revision;
 
-	function __construct(ActiveRow $dirRow) {
-		parent::__construct($dirRow);
-		$this->date = $dirRow->date->format('d.m.Y');
-		$this->change = $dirRow->change;
-		$this->revision = $dirRow->revision;
-		$this->addAnnex($dirRow);
+	function __construct(ActiveRow $drvRow) {
+		parent::__construct($drvRow);
+		$this->number = $drvRow->number;
+		$this->date = $drvRow->date->format('d.m.Y');
+		$this->change = $drvRow->change;
+		$this->revision = $drvRow->revision;
+		$this->addAnnex($drvRow);
 	}
 
 	/**
@@ -41,14 +42,15 @@ class Directive extends Annex {
 
 	/**
 	 * Adds all annexes for this directive.
-	 * @param object $dirRow annex data Nette\Database\Table\ActiveRow
+	 * @param object $drvRow annex data Nette\Database\Table\ActiveRow
 	 * @return void
 	 */
-	public function addAnnex(ActiveRow $dirRow) {
-		$annexData = $dirRow->related('annex.id')->order('order');
-		foreach ($annexData as $annexRow) {
-			$annex = new Annex($annexRow);
-			$this->addComponent($annex, "annex" . $annexRow->order);
+	public function addAnnex(ActiveRow $drvRow) {
+		$anxData = $drvRow->related('anx.drv_id')->order('order');
+		foreach ($anxData as $anxRow) {
+			$annex = new Annex($anxRow);
+			$annex->number = $this->number;
+			$this->addComponent($annex, "anx" . $anxRow->id);
 		}
 	}
 
@@ -94,7 +96,7 @@ class Directive extends Annex {
 	 */
 	public function formEditSave(Form $form) {
 		$data = $form->getValues();
-		$this->id = $data->id;
+		$this->number = $data->number;
 		$this->title = $data->title;
 		$this->date = $data->date;
 		$this->change = $data->change;
@@ -103,7 +105,7 @@ class Directive extends Annex {
 		$this->setDocument();
 		try {
 			$this->row->update(array(
-				 'id' => $this->id,
+				 'number' => $this->number,
 				 'title' => $this->title,
 				 'date' => $this->date,
 				 'change' => $this->change,
@@ -113,10 +115,10 @@ class Directive extends Annex {
 			if ($oldName) {
 				$this->renameDocFile($oldName, $this->document);
 			}
-			foreach ($this->getComponents(FALSE, "Annex") as $annex) {
-				$annex->id = $this->id;
-				$annex->updateData();
-			}
+//			foreach ($this->getComponents(FALSE, "Annex") as $annex) {
+//				$annex->id = $this->id;
+//				$annex->updateData();
+//			}
 			$this->presenter->flashMessage('Směrnice byla aktualizována.', 'success');
 			$this->redirect('this');
 		} catch (Nette\Application\AbortException $e) {

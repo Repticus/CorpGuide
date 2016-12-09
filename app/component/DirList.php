@@ -8,10 +8,10 @@ class DirList extends Control {
 
 	function __construct($database) {
 		parent::__construct();
-		$dirData = $database->getDirectives();
-		foreach ($dirData as $dirRow) {
-			$directive = new Directive($dirRow);
-			$this->addComponent($directive, "dir" . $dirRow->order);
+		$drvData = $database->getAllDrv();
+		foreach ($drvData as $drvRow) {
+			$directive = new Directive($drvRow, $drvRow->number);
+			$this->addComponent($directive, "dir" . $drvRow->id);
 		}
 	}
 

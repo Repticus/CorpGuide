@@ -11,22 +11,20 @@ use Nette\Application\UI\Form,
 class Annex extends Control {
 
 	public $id;
+	public $number;
 	public $order;
 	public $title;
 	public $document;
-	public $extension;
 	public $form;
-	public $row;
 	public $edit = FALSE;
 	public $upload = FALSE;
 
-	function __construct(ActiveRow $annexRow) {
+	function __construct(ActiveRow $anxRow) {
 		parent::__construct();
-		$this->id = $annexRow->id;
-		$this->order = $annexRow->order;
-		$this->title = $annexRow->title;
-		$this->document = $annexRow->document ? $annexRow->document : NULL;
-		$this->row = $annexRow;
+		$this->id = $anxRow->id;
+		$this->order = $anxRow->order;
+		$this->title = $anxRow->title;
+		$this->document = $anxRow->document ? $anxRow->document : NULL;
 	}
 
 	public function handleEdit() {
@@ -47,6 +45,7 @@ class Annex extends Control {
 	 * @return void
 	 */
 	public function showTools() {
+		\Tracy\Debugger::barDump($this->number);
 		if ($this->edit or $this->upload) {
 			echo $this->form["save"]->getControl();
 			echo $this->showStornoButton();
@@ -159,7 +158,7 @@ class Annex extends Control {
 			}
 			$extension = $this->getDocExtension($this->document);
 		}
-		$this->document = Strings::webalize($this->id . "_" . $this->getTitle(), '_', false) . "." . $extension;
+		$this->document = Strings::webalize($this->number . "_" . $this->getTitle(), '_', false) . "." . $extension;
 	}
 
 	/**
@@ -206,11 +205,10 @@ class Annex extends Control {
 	public function updateData() {
 		$oldName = $this->document;
 		$this->setDocument();
-		$this->row->update(array(
-			 'id' => $this->id,
-			 'title' => $this->title,
-			 'document' => $this->document
-		));
+//		$this->row->update(array(
+//			 'title' => $this->title,
+//			 'document' => $this->document
+//		));
 		if ($oldName) {
 			$this->renameDocFile($oldName, $this->document);
 		}
@@ -240,7 +238,7 @@ class Annex extends Control {
 		$extension = $this->getDocExtension($data->file->name);
 		$this->setDocument($extension);
 		$this->uploadDocFile($data->file);
-		$this->row->update(array('document' => $this->document));
+//		$this->row->update(array('document' => $this->document));
 		$this->presenter->flashMessage('Příloha směrnice byla aktualizována.', 'success');
 		$this->redirect("this");
 	}

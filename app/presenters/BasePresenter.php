@@ -3,7 +3,7 @@
 namespace App\Presenters;
 
 use DirList,
-	 DirRepository,
+	 DrvRepository,
 	 DirectiveException,
 	 Nette\Application\UI\Presenter;
 
@@ -12,10 +12,10 @@ abstract class BasePresenter extends Presenter {
 	/** @var string directory where documents are stored */
 	public $docDir;
 
-	/** @var DirRepository */
+	/** @var DrvRepository */
 	private $database;
 
-	public function __construct(DirRepository $database) {
+	public function __construct(DrvRepository $database) {
 		parent::__construct();
 		$this->database = $database;
 	}

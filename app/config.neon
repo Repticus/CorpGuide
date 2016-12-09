@@ -22,7 +22,7 @@ session:
 
 services:
 	router: App\RouterFactory::createRouter
-	- DirRepository
+	- DrvRepository
 
 security:
 	users:
