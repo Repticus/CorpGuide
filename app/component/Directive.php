@@ -6,6 +6,7 @@ use Nette\Application\UI\Form,
 
 class Directive extends Annex {
 
+	public $order;
 	public $date;
 	public $change;
 	public $revision;
@@ -46,10 +47,10 @@ class Directive extends Annex {
 	 * @return void
 	 */
 	public function addAnnex(ActiveRow $drvRow) {
-		$anxData = $drvRow->related('anx.drv_id')->order('order');
+		$anxData = $drvRow->related('anx.drv_id')->order('number');
 		foreach ($anxData as $anxRow) {
 			$annex = new Annex($anxRow);
-			$annex->number = $this->number;
+			$annex->directive = $this->number;
 			$this->addComponent($annex, "anx" . $anxRow->id);
 		}
 	}
@@ -102,7 +103,7 @@ class Directive extends Annex {
 		$this->change = $data->change;
 		$this->revision = $data->revision;
 		$oldName = $this->document;
-		$this->setDocument();
+		$this->getDocName();
 		try {
 			$this->row->update(array(
 				 'number' => $this->number,

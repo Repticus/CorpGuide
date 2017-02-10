@@ -11,8 +11,8 @@ use Nette\Application\UI\Form,
 class Annex extends Control {
 
 	public $id;
+	public $directive;
 	public $number;
-	public $order;
 	public $title;
 	public $document;
 	public $form;
@@ -22,7 +22,7 @@ class Annex extends Control {
 	function __construct(ActiveRow $anxRow) {
 		parent::__construct();
 		$this->id = $anxRow->id;
-		$this->order = $anxRow->order;
+		$this->number = $anxRow->number;
 		$this->title = $anxRow->title;
 		$this->document = $anxRow->document ? $anxRow->document : NULL;
 	}
@@ -45,7 +45,6 @@ class Annex extends Control {
 	 * @return void
 	 */
 	public function showTools() {
-		\Tracy\Debugger::barDump($this->number);
 		if ($this->edit or $this->upload) {
 			echo $this->form["save"]->getControl();
 			echo $this->showStornoButton();
@@ -130,7 +129,7 @@ class Annex extends Control {
 	 * @return string title for annex
 	 */
 	protected function getTitle() {
-		return "Příloha " . $this->order . " " . $this->title;
+		return "Příloha " . $this->number . " " . $this->title;
 	}
 
 	/**
@@ -151,14 +150,14 @@ class Annex extends Control {
 	 * @param string $extension file extension
 	 * @return string Return file name.
 	 */
-	protected function setDocument($extension = NULL) {
+	protected function getDocName($extension = NULL) {
 		if (!$extension) {
 			if (!$this->document) {
 				throw new DirectiveException(DirectiveException::DOCUMENT_NOT_SET);
 			}
 			$extension = $this->getDocExtension($this->document);
 		}
-		$this->document = Strings::webalize($this->number . "_" . $this->getTitle(), '_', false) . "." . $extension;
+		return Strings::webalize($this->directive . "_" . $this->getTitle(), '_', false) . "." . $extension;
 	}
 
 	/**
@@ -202,26 +201,14 @@ class Annex extends Control {
 	 * Process annex edit form.
 	 * @param  void
 	 */
-	public function updateData() {
-		$oldName = $this->document;
-		$this->setDocument();
-//		$this->row->update(array(
-//			 'title' => $this->title,
-//			 'document' => $this->document
-//		));
-		if ($oldName) {
-			$this->renameDocFile($oldName, $this->document);
-		}
-	}
-
-	/**
-	 * Process annex edit form.
-	 * @param  void
-	 */
 	public function formEditSave(Form $form) {
 		$data = $form->getValues();
-		$this->title = $data->title;
-		$this->updateData();
+		if ($this->document) {
+			$this->title = $data['title'];
+			$data['document'] = $this->getDocName();
+//			$this->renameDocFile($this->document, $data['document']);
+		}
+		$this->presenter->anx->update($this->id, $data);
 		$this->presenter->flashMessage('Příloha směrnice byla aktualizována.', 'success');
 		$this->redirect("this");
 	}
@@ -235,10 +222,7 @@ class Annex extends Control {
 		if ($this->document) {
 			$this->deleteDocFile();
 		}
-		$extension = $this->getDocExtension($data->file->name);
-		$this->setDocument($extension);
 		$this->uploadDocFile($data->file);
-//		$this->row->update(array('document' => $this->document));
 		$this->presenter->flashMessage('Příloha směrnice byla aktualizována.', 'success');
 		$this->redirect("this");
 	}
@@ -269,11 +253,12 @@ class Annex extends Control {
 	 */
 	public function uploadDocFile(FileUpload $file) {
 		$docdir = $this->presenter->docDir;
-		if (!$this->document) {
-			throw new DirectiveException(DirectiveException::DOCUMENT_NOT_SET);
-		}
-		$newFile = $docdir . "/" . $this->document;
+		$extension = $this->getDocExtension($file->name);
+		$name = $this->getDocName($extension);
+		$newFile = $docdir . "/" . $name;
 		$file->move($newFile);
+		$data = array('document' => $name);
+		$this->presenter->anx->update($this->id, $data);
 	}
 
 	/**

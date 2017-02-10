@@ -4,6 +4,7 @@ namespace App\Presenters;
 
 use DirList,
 	 DrvRepository,
+	 AnxRepository,
 	 DirectiveException,
 	 Nette\Application\UI\Presenter;
 
@@ -13,11 +14,15 @@ abstract class BasePresenter extends Presenter {
 	public $docDir;
 
 	/** @var DrvRepository */
-	private $database;
+	public $database;
 
-	public function __construct(DrvRepository $database) {
+	/** @var AnxRepository */
+	public $anx;
+
+	public function __construct(DrvRepository $database, AnxRepository $anx) {
 		parent::__construct();
 		$this->database = $database;
+		$this->anx = $anx;
 	}
 
 	public function startup() {
